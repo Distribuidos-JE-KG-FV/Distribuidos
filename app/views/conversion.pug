@@ -9,7 +9,7 @@ mixin conversion(c)
 
 mixin modals(c)
     div(class="modal fade", id= c.id, tabindex="-1", role="dialog", aria-hidden="true")
-        form(method="POST" action=c.action)
+        form(method="POST" , enctype="multipart/form-data", action=c.action)
             div(class="modal-dialog modal-dialog-centered",role="document")
                 div.modal-content
                     div.modal-header
@@ -22,7 +22,7 @@ mixin modals(c)
                             div(class="input-group-prepend")
                                 span(class="input-group-text") 
                             div(class="custom-file")
-                                input(type="file",class="custom-file-input",lang="es")
+                                input(type="file",class="custom-file-input",lang="es", name="upload")
                                 label(class="custom-file-label") ...
                     div.modal-footer
                         button(type="button", class="btn btn-secondary", data-dismiss="modal") Cerrar
