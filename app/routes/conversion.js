@@ -1,53 +1,52 @@
 var express = require('express');
 var router = express.Router();
-var aws="/conversion";
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('conversion', { title: 'Conversion'});
-});
+var aws = "/conversion";
 
+var bucket_name='bucket-dist-receptor'
 //const fs = require('fs');
 const AWS = require('aws-sdk');
-const multerS3 = require( 'multer-s3' );
+const multerS3 = require('multer-s3');
 const multer = require('multer');
-const path = require( 'path' );
+const path = require('path');
 const url = require('url');
-const s3 = new AWS.S3({
-    accessKeyId: "AKIAURD34BBPNXNKR7F6",
-    secretAccessKey:"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" 
-});
 
+const s3 = new AWS.S3();
 
 const profileImgUpload = multer({
-    storage: multerS3({
-     s3: s3,
-     bucket: 'bucket-dist-receptor',
-     acl: 'public-read',
-     key: function (req, file, cb) {
-      cb(null, path.basename( file.originalname, path.extname( file.originalname ) ) + '-' + Date.now() + path.extname( file.originalname ) )
-     }
-    }),
-    limits:{ fileSize: 50000000 }, // In bytes: 2000000 bytes = 2 MB
-    fileFilter: function( req, file, cb ){
-     checkFileType( file, cb );
+  storage: multerS3({
+    s3: s3,
+    bucket: bucket_name,
+    acl: 'public-read',
+    key: function (req, file, cb) {
+      cb(null, path.basename(file.originalname, path.extname(file.originalname)) + '-' + Date.now() + path.extname(file.originalname))
     }
-   }).single('upload');
+  }),
+  limits: { fileSize: 50000000 }, // In bytes: 2000000 bytes = 2 MB
+  fileFilter: function (req, file, cb) {
+    checkFileType(file, cb);
+  }
+}).single('upload');
 
-function checkFileType( file, cb ){
-    const filetypes = /jpeg|jpg|png|gif/;
-    const extname = filetypes.test( path.extname( file.originalname ).toLowerCase());
-    const mimetype = filetypes.test( file.mimetype );
-    if( mimetype && extname ){
-        return cb( null, true );
-    } else {
-        cb( 'Error: Images Only!' );
-    }
+function checkFileType(file, cb) {
+  const filetypes = /jpeg|jpg|png/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb('Error: Images Only!');
+  }
 }
 
-/*function retrieveFile(filename,res){
+/* GET home page. */
+router.get('/', function (req, res, next) {
+  res.render('conversion', { title: 'Conversion' });
+});
+
+function retrieveFile(filename,res){
 
     const getParams = {
-      Bucket: 'sample-bucket-name',
+      Bucket: bucket_name,
       Key: filename
     };
   
@@ -59,34 +58,34 @@ function checkFileType( file, cb ){
         return res.send(data.Body);
       }
     });
-}*/
+}
 
-router.post( '/image', function(req,res,next){
-    profileImgUpload( req, res, ( error ) => {
-      if( error ){
-       console.log( 'errors', error );
-       res.json( { error: error } );
+router.post('/image', function (req, res, next) {
+  profileImgUpload(req, res, (error) => {
+    if (error) {
+      console.log('errors', error);
+      res.json({ error: error });
+    } else {
+      if (req.file === undefined) {
+        console.log('Error: No File Selected!');
+        res.json('Error: No File Selected');
       } else {
-       if( req.file === undefined ){
-        console.log( 'Error: No File Selected!' );
-        res.json( 'Error: No File Selected' );
-       } else {
         console.log("success");
         res.render('index');
-       }
       }
-     });
+    }
+  });
 });
 
 
-router.post('/audio', function(req,res,next){
-    //AQUI VA LA MAGIA
-    res.render('conversion_wait', { title: 'Espera...', text:'El audio está siendo procesado'});
+router.post('/audio', function (req, res, next) {
+  //AQUI VA LA MAGIA
+  res.render('conversion_wait', { title: 'Espera...', text: 'El audio está siendo procesado' });
 })
 
-router.post('/video', function(req,res,next){
-    //AQUI VA LA MAGIA
-    res.render('conversion_wait', { title: 'Espera...', text:'El video está siendo procesado'});
+router.post('/video', function (req, res, next) {
+  //AQUI VA LA MAGIA
+  res.render('conversion_wait', { title: 'Espera...', text: 'El video está siendo procesado' });
 })
 
 module.exports = router;

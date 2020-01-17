@@ -16,7 +16,8 @@ public class Imagen {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        Funcion.generarPDF("coneja.jpg", "coneja.pdf");
+        Funcion fn=new ImagePdfBuilder().image("cupcoffeev5.png").buildFuncion();
+        fn.generarPDF();
     }
     
 }

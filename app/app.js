@@ -47,6 +47,8 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-var port=3000;
-
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 8000;
+}
 app.listen(port);
