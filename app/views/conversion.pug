@@ -22,18 +22,22 @@ mixin modals(c)
                             div(class="input-group-prepend")
                                 span(class="input-group-text") 
                             div(class="custom-file")
-                                input(type="file",class="custom-file-input",lang="es", name="upload")
+                                input(type="file",class="custom-file-input",lang="es", name="upload", accept=c.files)
                                 label(class="custom-file-label") ...
                     div.modal-footer
                         button(type="button", class="btn btn-secondary", data-dismiss="modal") Cerrar
-                        button(type="submit", class="btn btn-primary") Enviar
+                        button(type="submit", class="btn btn-primary form-submit") Enviar
+
+block head
+    script(type="text/javascript",src='/js/conversion.js')
+
 
 block header
     - 
         const cards = [
-            {id:"id1",title:"Convertidor Imagen a PDF",text:"Convierta cualquier tipo de imagen en un archivo PDF.",action:"conversion/image"},
-            {id:"id2",title:"Convertidor de Audio",text:"Convierta archivos de audio a uno de los diferentes formatos disponibles.",action:"conversion/audio"},
-            {id:"id3",title:"Convertidor de Video",text:"Convierta archivos de video a uno de los diferentes formatos disponibles.",action:"conversion/video"}
+            {id:"id1",title:"Convertidor Imagen a PDF",text:"Convierta cualquier tipo de imagen en un archivo PDF.",action:"conversion/image", files:"image/x-png,,image/jpeg"},
+            {id:"id2",title:"Convertidor de Audio",text:"Convierta archivos de audio a uno de los diferentes formatos disponibles.",action:"conversion/audio", files:"audio/*"},
+            {id:"id3",title:"Convertidor de Video",text:"Convierta archivos de video a uno de los diferentes formatos disponibles.",action:"conversion/video", files:"video/*"}
         ]
     
     for c in cards

@@ -2,7 +2,9 @@ var express = require('express');
 var router = express.Router();
 var aws = "/conversion";
 
-var bucket_name='bucket-dist-receptor'
+var bucket_name = 'bucket-dist-receptor'
+var r_bucket_name = 'bucket-dist-emisor'
+
 //const fs = require('fs');
 const AWS = require('aws-sdk');
 const multerS3 = require('multer-s3');
@@ -10,7 +12,7 @@ const multer = require('multer');
 const path = require('path');
 const url = require('url');
 
-const s3 = new AWS.S3();
+const s3 = new AWS.S3({region:"sa-east-1"});
 
 const profileImgUpload = multer({
   storage: multerS3({
@@ -18,7 +20,10 @@ const profileImgUpload = multer({
     bucket: bucket_name,
     acl: 'public-read',
     key: function (req, file, cb) {
-      cb(null, path.basename(file.originalname, path.extname(file.originalname)) + '-' + Date.now() + path.extname(file.originalname))
+      var newFileName=path.basename(file.originalname, path.extname(file.originalname)) + '-' + Date.now() + path.extname(file.originalname);
+      var fullPath = 'images/'+ newFileName;
+      document.cookie="pathfile="+fullPath;
+      cb(null, fullPath);
     }
   }),
   limits: { fileSize: 50000000 }, // In bytes: 2000000 bytes = 2 MB
@@ -43,22 +48,50 @@ router.get('/', function (req, res, next) {
   res.render('conversion', { title: 'Conversion' });
 });
 
-function retrieveFile(filename,res){
+function retrieveFile(filename, res) {
+  console.log(filename);
 
-    const getParams = {
-      Bucket: bucket_name,
-      Key: filename
-    };
-  
-    s3.getObject(getParams, function(err, data) {
-      if (err){
-        return res.status(400).send({success:false,err:err});
-      }
-      else{
-        return res.send(data.Body);
-      }
-    });
+  const getParams = {
+    Bucket: r_bucket_name,
+    Key: filename,
+    
+  };
+  const wt={
+    Bucket: r_bucket_name,
+    Key: filename,
+    $waiter: {
+      maxAttempts: 5,
+      delay: 3
+    }
+  }
+  s3.waitFor('objectExists', wt, function(err, data) {
+    if (err) console.log(err, err.stack); // an error occurred
+    else{ //success
+      s3.getObject(getParams, function (err, data) {
+        if (err) {
+          return res.status(400).send({ success: false, err: err });
+        }
+        else {
+          return res.send(data.Body);
+        }
+      });
+    }
+  });
+/*
+  s3.getObject(getParams, function (err, data) {
+    if (err) {
+      return res.status(400).send({ success: false, err: err });
+    }
+    else {
+      return res.send(data.Body);
+    }
+  });*/
 }
+
+
+router.get('/get_file/:file_name',(req,res)=>{
+  retrieveFile("images/"+req.params.file_name, res);
+});
 
 router.post('/image', function (req, res, next) {
   profileImgUpload(req, res, (error) => {
@@ -70,11 +103,16 @@ router.post('/image', function (req, res, next) {
         console.log('Error: No File Selected!');
         res.json('Error: No File Selected');
       } else {
+        //res.cookie('filename', req.file.);
         console.log("success");
-        res.render('index');
+        res.render('conversion_wait', { title: 'Espera...', text: 'La imagen está siendo procesada' });
       }
     }
   });
+});
+
+router.get('/conversion_wait',function(req, res, next){
+  //retrieveFile("images/"+filename+".pdf", res);
 });
 
 

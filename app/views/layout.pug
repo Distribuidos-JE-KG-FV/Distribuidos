@@ -18,6 +18,8 @@ html(lang="en", class="full-height")
     script(type="text/javascript", src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js")
     //MDB core JavaScript
     script(type="text/javascript", src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.10.1/js/mdb.min.js")
+
+    block head
     
   body
     header
@@ -37,7 +39,7 @@ html(lang="en", class="full-height")
             block header
     block content
 
-    footer.indigo
+    footer.indigo.fixed-bottom
       div.container
         div.row
           div.col-12.white-text.text-center.py-3.

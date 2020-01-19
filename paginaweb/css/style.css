@@ -1,0 +1,19 @@
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.view {
+    background: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRM1pyqwHYTGW3kpXWNVgZyOnl0tLcyWVsFpuyQ0JoO2LtQWB_B&s")repeat center center;
+    background-size: auto;
+}
+
+html,
+body,
+.view {
+    height: 100%;
+}

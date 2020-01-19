@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" class="full-height">
+
+<head>
+    <title>Proyecto SD</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.10.1/css/mdb.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.10.1/js/mdb.min.js"></script>
+    <!-- AWS SDK -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>
+    <script type="text/javascript" src="js/conversion.js"></script>
+</head>
+
+<body>
+    <!--Main Navigation-->
+    <header>
+
+        <nav class="navbar fixed-top navbar-expand-lg navbar-dark indigo">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Principal <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="conversion.html">Conversion</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="view">
+            <div class="full-bg-img">
+                <div class="mask rgba-black-light flex-center">
+                    <div class="card mr-2" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">Convertidor Imagen a PDF</h5>
+                            <p class="card-text">Convierta cualquier tipo de imagen en un archivo PDF.</p>
+                            <a href="#" data-toggle="modal" data-target="#id0" class="btn btn-primary">Realizar
+                                conversión</a>
+                        </div>
+                    </div>
+                    <div class="card mr-2" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">Convertidor de Audio</h5>
+                            <p class="card-text">Convierta archivos de audio a uno de los diferentes formatos
+                                disponibles.</p>
+                            <a href="#" data-toggle="modal" data-target="#id1" class="btn btn-primary">Realizar
+                                conversión</a>
+                        </div>
+                    </div>
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">Convertidor de Video</h5>
+                            <p class="card-text">Convierta archivos de video a uno de los diferentes formatos
+                                disponibles.</p>
+                            <a href="#" data-toggle="modal" data-target="#id2" class="btn btn-primary">Realizar
+                                conversión</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="id0" tabindex="-1" role="dialog" aria-hidden="true">
+            <form method="POST" encType="multipart/form-data">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" id="exampleModalLongTitle">{this.valores.title}</h3>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true"> &times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h5> Elige el archivo que deseas convertir </h5>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"></span>
+                                </div>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" lang="es"
+                                        name="upload" accept="image/x-png,,image/jpeg"></input>
+                                    <label class="custom-file-label">...</label>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                    Cerrar</button>
+                                <button type="submit" class="btn btn-primary form-submit"> Enviar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </header>
+    <footer class="indigo">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 white-text text-center py-3">
+                    José Escobar, Kevin Gómez, Fernando Vaca
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
