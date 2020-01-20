@@ -13,7 +13,11 @@ body {
 }
 
 .card{
-  width: 18rem;
+  width: 25%;
+}
+
+p{
+  margin-bottom: 1rem !important;
 }
 
 html,

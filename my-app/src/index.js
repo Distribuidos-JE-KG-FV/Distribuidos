@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import Main from './App';
 import * as serviceWorker from './serviceWorker';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css'; // Archivo CSS de Bootstrap 4 
+import 'bootstrap/dist/js/bootstrap.min.js';
+
 import $ from 'jquery';
 
 ReactDOM.render(<Main />, $("#root")[0])//document.getElementByClass(''));
