@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>lambda-dist-audio</groupId>
+  <artifactId>lambda-java-audio</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>lambda-java-audio</name>
+<dependencies>
+	  	<dependency>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-java-sdk-core</artifactId>
+		    <version>1.11.707</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-lambda-java-core</artifactId>
+		    <version>1.2.0</version>
+		</dependency>
+		
+	  	<dependency>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-java-sdk-lambda</artifactId>
+		    <version>1.11.707</version>
+		</dependency>
+		
+	  	<dependency>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-lambda-java-events</artifactId>
+		    <version>2.2.7</version>
+		</dependency>
+	
+		<dependency>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-java-sdk-s3</artifactId>
+		    <version>1.11.707</version>
+		</dependency>
+		<dependency>
+		    <groupId>ws.schild</groupId>
+		    <artifactId>jave-core</artifactId>
+		    <version>2.7.3</version>
+		</dependency>
+		<dependency>
+		    <groupId>ws.schild</groupId>
+		    <artifactId>jave-nativebin-linux64</artifactId>
+		    <version>2.7.3</version>
+		</dependency>
+  	</dependencies>
+ 	<build>
+		<plugins>
+			<plugin>
+	 			<groupId>org.apache.maven.plugins</groupId>
+	 			<artifactId>maven-shade-plugin</artifactId>
+	 			<version>3.2.1</version>
+	 		</plugin>
+		</plugins>
+	 </build>
+</project>
