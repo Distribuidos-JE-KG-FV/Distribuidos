@@ -3,9 +3,9 @@ import SendToAWS from "./SendToAWS"
 
 class Conversion extends Component {
     cards = [
-        { id: "id1", title: "Convertidor Imagen a PDF", text: "Convierta cualquier tipo de imagen en un archivo PDF.", action: "images", files: "image/x-png,,image/jpeg" },
-        { id: "id2", title: "Convertidor de Audio", text: "Convierta archivos de audio a uno de los diferentes formatos disponibles.", action: "audios", files: "audio/*" },
-        { id: "id3", title: "Convertidor de Video", text: "Convierta archivos de video a uno de los diferentes formatos disponibles.", action: "videos", files: "video/*" }
+        { id: "id1", title: "Convertidor Imagen a PDF", text: "Convierta images tipo png y jpeg en un archivo PDF.", action: "images", files: ".png,.jpeg,.jpg" },
+        { id: "id2", title: "Convertidor de Audio", text: "Convierta archivos de audio MP3 a WAV.", action: "audio", files: ".mp3" },
+        { id: "id3", title: "Convertidor de Video", text: "Convierta archivos de video MP4 a AVI.", action: "video", files: ".mp4*" }
     ];
 
     constructor(props) {
@@ -88,7 +88,7 @@ class Espera extends Component {
         return (
             <div className="container text-center white-text">
                 <div className="white-text text-center black">
-                    <h2>Espera...</h2>
+                    <h2 id="titu">Espera...</h2>
                     <br></br>
                     <h5 id="gg">{this.text}</h5>
                 </div>

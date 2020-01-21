@@ -1,21 +1,22 @@
 import React, { Component } from "react";
-import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import Cookies from 'js-cookie'
 import * as path from 'path';
 import * as mime from 'mime-types'
-import axios from 'axios';
 import * as keys from './keys.js'
-import {Redirect} from 'react-router-dom';
 
 const AWS = require('aws-sdk');
 const r_bucket_name = 'bucket-dist-receptor'
 const e_bucket_name = 'bucket-dist-emisor'
-const s3 = new AWS.S3({accessKeyId: keys.iam_access_id,
-    secretAccessKey: keys.iam_secret,
-    region: "sa-east-1"});
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: "sa-east-1"
+});
 
-function checkFileType(file, filetypes) {
+function checkFileTypeSize(file, filetypes, fileSize, limitSize) {
+    if (fileSize > limitSize) {
+        return false;
+    }
     const extname = filetypes.test(file);
     const mimetype = filetypes.test(file);
     if (mimetype && extname) {
@@ -34,26 +35,15 @@ class SendToAWS extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.state = {
             selectedFile: undefined
-          }
+        }
     }
-    onChangeHandler=event=>{
+    onChangeHandler = event => {
 
         console.log(event.target.files[0])
         this.setState({
             selectedFile: event.target.files[0],
-          })
+        })
     }
-/*
-    onClickHandler = () => {
-        const data = new FormData() 
-        data.append('file', this.state.selectedFile)
-        axios.post("http://localhost:3000/upload", data, { // receive two parameter endpoint url ,form data 
-      })
-      .then(res => { // then print response status
-        console.log(res.statusText)
-      })
-    }
-*/
     handleSubmit(event) {
         event.preventDefault();
 
@@ -61,61 +51,71 @@ class SendToAWS extends Component {
             alert("No se ha elegido un archivo")
             return;
         }
-        //var newFileName = path.basename(this.state.selectedFile.name.replace(/\.[^/.]+$/, ""), path.extname(this.state.selectedFile)) + '-'+Date.now() + path.extname(this.state.selectedFile.name)
-        //var pathfile=this.valores.action+'/'+newFileName;
-        //console.log(newFileName);
-        /*
+
+        var time=new Date().getSeconds();
+        if(this.customfilename.value===undefined || this.customfilename.value===""){
+            var newFileName = path.basename(this.state.selectedFile.name.replace(/\.[^/.]+$/, ""), path.extname(this.state.selectedFile).toLowerCase()) + '-' + time + path.extname(this.state.selectedFile.name).toLowerCase();
+        }
+        else{
+            var newFileName = path.basename(this.customfilename.value, path.extname(this.state.selectedFile).toLowerCase()) + '-' + time + path.extname(this.state.selectedFile.name).toLowerCase();
+        }
+        var pathfile = this.valores.action + '/' + newFileName;
         var params = {
             Bucket: r_bucket_name,
-            Key: this.valores.action + '/' + newFileName,
-            Body: this.state.selectedFile.buffer,
+            Key: pathfile,
+            Body: this.state.selectedFile,
             ContentType: mime.lookup(newFileName.toLowerCase()),
             ACL: "public-read"
         }
-        console.log(params);*/
+        var limitImg = 10000000;//10MB
+        var limitAudio = 15000000;//15MB
+        var limitVideo = 15000000; //15MB
+        console.log(pathfile);
         switch (this.valores.action) {
             case "images":
                 const imgTypes = /jpeg|jpg|png|PNG/;
-                if (checkFileType(this.state.selectedFile.name, imgTypes)) {
+                if (checkFileTypeSize(this.state.selectedFile.name, imgTypes, this.state.selectedFile.size, limitImg)) {
                     $(".modal").modal('hide');
                     $("input[type=file]").val('');
                     $(".custom-file-label").html("...");
-                    const data = new FormData() 
-                    data.append('file', this.state.selectedFile);
                     this.props.enviar();
-                    axios.post("http://localhost:8000/upload-image", data, { // receive two parameter endpoint url ,form data 
-                    })
-                    .then(res => { // then print response status
-                        var fileToDownload=res.data.key;
-                        $('#gg').html("Tu imagen está siendo procesada");
-                        waitForFile(".pdf", fileToDownload);
-                    })
+                    s3.putObject(
+                        params,
+                        function (err, data) {
+                            if (err) {
+                                alert('Ha ocurrido un error al subir tu archivo');
+                            } else {
+                                $('#gg').html("Tu imagen está siendo procesada");
+                                waitForFile(".pdf", pathfile, 3);
+                            }
+                        }
+                    )
                 }
                 else {
                     alert("El archivo seleccionado no es válido")
                     $("input[type=file]").val('');
                     $(".custom-file-label").html("...");
                 }
-
                 break;
-            case "audios":
+            case "audio":
                 //HAY QUE CAMBIAR ESTO PARA LOS AUDIOS
-                const audioTypes = /jpeg|jpg|png|PNG/;
-                if (checkFileType(this.state.selectedFile.name, audioTypes)) {
+                const audioTypes = /mp3/;
+                if (checkFileTypeSize(this.state.selectedFile.name, audioTypes, this.state.selectedFile.size, limitAudio)) {
                     $(".modal").modal('hide');
                     $("input[type=file]").val('');
                     $(".custom-file-label").html("...");
-                    const data = new FormData() 
-                    data.append('file', this.state.selectedFile);
                     this.props.enviar();
-                    axios.post("http://localhost:8000/upload-audio", data, { // receive two parameter endpoint url ,form data 
-                    })
-                    .then(res => { // then print response status
-                        var fileToDownload=res.data.key;
-                        $('#gg').html("Tu audio está siendo procesado");
-                        //HAY QUE AGREGAR LA EXTENSION RESULTANTE
-                        waitForFile(".", fileToDownload);
-                    })
+                    s3.putObject(
+                        params,
+                        function (err, data) {
+                            if (err) {
+                                alert('Ha ocurrido un error al subir tu archivo');
+                            } else {
+                                $('#gg').html("Tu audio está siendo procesado");
+                                waitForFile(".wav", pathfile, 4);
+                            }
+                        }
+                    )
                 }
                 else {
                     alert("El archivo seleccionado no es válido")
@@ -123,24 +123,25 @@ class SendToAWS extends Component {
                     $(".custom-file-label").html("...");
                 }
                 break;
-            case "videos":
+            case "video":
                 //HAY QUE CAMBIAR ESTO PARA LOS VIDEOS
-                const videoTypes = /jpeg|jpg|png|PNG/;
-                if (checkFileType(this.state.selectedFile.name, videoTypes)) {
+                const videoTypes = /mp4/;
+                if (checkFileTypeSize(this.state.selectedFile.name, videoTypes, this.state.selectedFile.size, limitVideo)) {
                     $(".modal").modal('hide');
                     $("input[type=file]").val('');
                     $(".custom-file-label").html("...");
-                    const data = new FormData() 
-                    data.append('file', this.state.selectedFile);
                     this.props.enviar();
-                    axios.post("http://localhost:8000/upload-video", data, { // receive two parameter endpoint url ,form data 
-                    })
-                    .then(res => { // then print response status
-                        var fileToDownload=res.data.key;
-                        $('#gg').html("Tu video está siendo procesado");
-                        //HAY QUE AGREGAR LA EXTENSION RESULTANTE
-                        waitForFile(".", fileToDownload);
-                    })
+                    s3.putObject(
+                        params,
+                        function (err, data) {
+                            if (err) {
+                                alert('Ha ocurrido un error al subir tu archivo');
+                            } else {
+                                $('#gg').html("Tu video está siendo procesado");
+                                waitForFile(".avi", pathfile, 4);
+                            }
+                        }
+                    )
                 }
                 else {
                     alert("El archivo seleccionado no es válido")
@@ -169,6 +170,10 @@ class SendToAWS extends Component {
                         </div>
                         <div className="modal-body">
                             <h5> Elige el archivo que deseas convertir </h5>
+                            <div className="md-form">
+                                <input type="text" id={"form1"+this.valores.id} ref={(c) => this.customfilename = c} className="form-control"></input>
+                                <label for={"form1"+this.valores.id}>Nombre de tu archivo (sin extensiones)</label>
+                            </div>
                             <div className="input-group">
                                 <div className="input-group-prepend">
                                     <span className="input-group-text" id={"inputGroupFileAddon" + this.valores.id}></span>
@@ -192,25 +197,20 @@ class SendToAWS extends Component {
 
 
 
-function Download(url){
-    return(
-        $('<iframe>', { id:'idown', src:url }).hide().appendTo('body').click()
-    );
-}
 
-function waitForFile(ext, fileToDownload) {
+function waitForFile(ext, fileToDownload, wait) {
     var filename = fileToDownload + ext;
     const getParams = {
         Bucket: e_bucket_name,
         Key: filename,
-        Expires: 60*3
+        Expires: 60
     };
     const wt = {
         Bucket: e_bucket_name,
         Key: filename,
         $waiter: {
-            maxAttempts: 12,
-            delay: 5
+            maxAttempts: 20,
+            delay: wait
         }
     }
     s3.waitFor('objectExists', wt, function (err, data) {
@@ -218,13 +218,14 @@ function waitForFile(ext, fileToDownload) {
             alert("Ha ocurrido un error. Lo sentimos")
         } // an error occurred
         else { //success
-            s3.getSignedUrl("getObject",getParams, function (err, url) {
+            s3.getSignedUrl("getObject", getParams, function (err, url) {
                 if (err) {
                     alert("Ha ocurrido un error. Lo sentimos")
                 }
                 else {
-                    $('#gg').html("<a href='"+url+"' target='_blank' download='"+Cookies.get('pathfile')+"' class='btn indigo white-text'>Descargar</a>");
-                    console.log('Tu url de descarga es:'+url);
+                    $('#gg').html("<a href='" + url + "' target='_blank' download class='btn indigo white-text'>Descargar</a>");
+                    $('#titu').html("Tu descarga está lista");
+                    console.log('Tu url de descarga es:' + url);
                 }
             });
         }
