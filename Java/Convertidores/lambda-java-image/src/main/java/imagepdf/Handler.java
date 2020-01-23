@@ -3,9 +3,9 @@ package imagepdf;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,11 +18,11 @@ import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.event.S3EventNotification.S3EventNotificationRecord;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
+import com.amazonaws.services.s3.model.GetObjectTaggingResult;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 public class Handler implements
@@ -31,7 +31,7 @@ public class Handler implements
     //private static final float MAX_HEIGHT = 100;
     private final String JPG_TYPE = (String) "jpg";
     //private final String JPG_MIME = (String) "image/jpeg";
-    private final String JPEG_TYPE = (String) "jpg";
+    private final String JPEG_TYPE = (String) "jpeg";
     //private final String JPEG_MIME = (String) "image/jpeg";
     private final String PNG_TYPE = (String) "png";
     //private final String PNG_MIME = (String) "image/png";
@@ -48,6 +48,14 @@ public class Handler implements
             String dstBucket = "bucket-dist-emisor";
             String dstKey = srcKey+".pdf";
 
+            GetObjectTaggingRequest getTaggingRequest = new GetObjectTaggingRequest(srcBucket, srcKey);
+            AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
+            GetObjectTaggingResult getTagsResult = s3Client.getObjectTagging(getTaggingRequest);
+            List<Tag> tags=getTagsResult.getTagSet();
+            String channel="";
+            if(!tags.isEmpty()) {
+            	channel=tags.get(0).getValue();
+            }
             // Sanity check: validate that source and destination are different
             // buckets.
             if (srcBucket.equals(dstBucket)) {
@@ -70,44 +78,21 @@ public class Handler implements
             }
 
             // Download the image from S3 into a stream
-            AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
             S3Object s3Object = s3Client.getObject(new GetObjectRequest(
                     srcBucket, srcKey));
             InputStream objectData = s3Object.getObjectContent();
 
             // Read the source image
             BufferedImage srcImage = ImageIO.read(objectData);
+            
             //Create de PdfConverter
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            
-            ImagePdfConverter newpdf= new ImagePdfBuilder().image(srcImage).center(true).buildConverter();
-            Document doc=newpdf.generarPDF(os);
-            /*
-            int srcHeight = srcImage.getHeight();
-            int srcWidth = srcImage.getWidth();
-            // Infer the scaling factor to avoid stretching the image
-            // unnaturally
-            float scalingFactor = Math.min(MAX_WIDTH / srcWidth, MAX_HEIGHT
-                    / srcHeight);
-            int width = (int) (scalingFactor * srcWidth);
-            int height = (int) (scalingFactor * srcHeight);
-
-            BufferedImage resizedImage = new BufferedImage(width, height,
-                    BufferedImage.TYPE_INT_RGB);
-            Graphics2D g = resizedImage.createGraphics();
-            // Fill with white before applying semi-transparent (alpha) images
-            g.setPaint(Color.white);
-            g.fillRect(0, 0, width, height);
-            // Simple bilinear resize
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(srcImage, 0, 0, width, height, null);
-            g.dispose();
-         	*/
-            // Re-encode file to target format
-            
-            
-            //ImageIO.write(resizedImage, imageType, os);
+            ImagePdfConverter newpdf=null;
+            if(channel.equals("1"))
+            	newpdf= new ImagePdfBuilder().image(srcImage).center(true).buildConverter();
+            else
+            	newpdf= new ImagePdfBuilder().image(srcImage).fit(true).buildConverter();
+            newpdf.generarPDF(os);
             InputStream is = new ByteArrayInputStream(os.toByteArray());
             // Set Content-Length and Content-Type
             ObjectMetadata meta = new ObjectMetadata();

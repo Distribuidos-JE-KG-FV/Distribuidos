@@ -3,13 +3,15 @@ import $ from 'jquery';
 import * as path from 'path';
 import * as mime from 'mime-types'
 import * as keys from './keys.js'
+import Dropdown from 'react-dropdown'
+import 'react-dropdown/style.css'
 
 const AWS = require('aws-sdk');
 const r_bucket_name = 'bucket-dist-receptor'
 const e_bucket_name = 'bucket-dist-emisor'
 const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: keys.iam_access_id || process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: keys.iam_secret || process.env.AWS_SECRET_ACCESS_KEY,
     region: "sa-east-1"
 });
 
@@ -33,13 +35,25 @@ class SendToAWS extends Component {
         super(props);
         this.valores = this.props.valores;
         this.handleSubmit = this.handleSubmit.bind(this);
+        if (this.valores.action === "images") {
+            this.options = [{ value: 1, label: "Centrado y ajustado" }, { value: 2, label: "Estrecho a la página" }]
+            this.defSelected = 1;
+        }
+        else {
+            this.options = [{ value: 1, label: "Mono" }, { value: 2, label: "Stereo" }]
+            this.defSelected = 1;
+        }
         this.state = {
             selectedFile: undefined
         }
     }
+
+    changeParam = event =>{
+        this.defSelected=event.value
+    }
+
     onChangeHandler = event => {
 
-        console.log(event.target.files[0])
         this.setState({
             selectedFile: event.target.files[0],
         })
@@ -51,13 +65,13 @@ class SendToAWS extends Component {
             alert("No se ha elegido un archivo")
             return;
         }
-
-        var time=new Date().getSeconds();
-        if(this.customfilename.value===undefined || this.customfilename.value===""){
-            var newFileName = path.basename(this.state.selectedFile.name.replace(/\.[^/.]+$/, ""), path.extname(this.state.selectedFile).toLowerCase()) + '-' + time + path.extname(this.state.selectedFile.name).toLowerCase();
+        var newFileName = "";
+        var time = new Date();
+        if (this.customfilename.value === undefined || this.customfilename.value === "") {
+            newFileName = path.basename(this.state.selectedFile.name.replace(/\.[^/.]+$/, ""), path.extname(this.state.selectedFile).toLowerCase()) + '-' + time.getSeconds() + path.extname(this.state.selectedFile.name).toLowerCase();
         }
-        else{
-            var newFileName = path.basename(this.customfilename.value, path.extname(this.state.selectedFile).toLowerCase()) + '-' + time + path.extname(this.state.selectedFile.name).toLowerCase();
+        else {
+            newFileName = path.basename(this.customfilename.value, path.extname(this.state.selectedFile).toLowerCase()) + '-' + time.now() + path.extname(this.state.selectedFile.name).toLowerCase();
         }
         var pathfile = this.valores.action + '/' + newFileName;
         var params = {
@@ -65,7 +79,8 @@ class SendToAWS extends Component {
             Key: pathfile,
             Body: this.state.selectedFile,
             ContentType: mime.lookup(newFileName.toLowerCase()),
-            ACL: "public-read"
+            ACL: "public-read",
+            Tagging: "channel="+this.defSelected
         }
         var limitImg = 10000000;//10MB
         var limitAudio = 15000000;//15MB
@@ -73,7 +88,7 @@ class SendToAWS extends Component {
         console.log(pathfile);
         switch (this.valores.action) {
             case "images":
-                const imgTypes = /jpeg|jpg|png|PNG/;
+                const imgTypes = /jpeg|jpg|png|PNG|JPG|JPEG/;
                 if (checkFileTypeSize(this.state.selectedFile.name, imgTypes, this.state.selectedFile.size, limitImg)) {
                     $(".modal").modal('hide');
                     $("input[type=file]").val('');
@@ -169,19 +184,17 @@ class SendToAWS extends Component {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <h5> Elige el archivo que deseas convertir </h5>
                             <div className="md-form">
-                                <input type="text" id={"form1"+this.valores.id} ref={(c) => this.customfilename = c} className="form-control"></input>
-                                <label for={"form1"+this.valores.id}>Nombre de tu archivo (sin extensiones)</label>
+                                <input type="text" id={"form1" + this.valores.id} ref={(c) => this.customfilename = c} className="form-control"></input>
+                                <label htmlFor={"form1" + this.valores.id}>Nombre de tu archivo de salida</label>
                             </div>
+                            <p> Elige el archivo que deseas convertir </p>
                             <div className="input-group">
-                                <div className="input-group-prepend">
-                                    <span className="input-group-text" id={"inputGroupFileAddon" + this.valores.id}></span>
-                                </div>
-                                <div className="custom-file">
-                                    <input id={"input" + this.valores.id} type="file" aria-describedby={"inputGroupFileAddon" + this.valores.id} className="custom-file-input" lang="es" onChange={this.onChangeHandler} name="upload" accept={this.valores.files}></input>
-                                    <label htmlFor={"input" + this.valores.id} className="custom-file-label">...</label>
-                                </div>
+                                <input type="file" name="upload" onChange={this.onChangeHandler} accept={this.valores.files} id={"customFile" + this.valores.id}></input>
+                            </div>
+                            <div className="my-4 dropdown">
+                                <label>Elige una opción de conversion</label>
+                                <Dropdown options={this.options} onChange={this.changeParam} value={this.defSelected} placeholder="Selecciona una opción" />
                             </div>
                             <div className="modal-footer text-center">
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal"> Cerrar</button>
@@ -203,7 +216,7 @@ function waitForFile(ext, fileToDownload, wait) {
     const getParams = {
         Bucket: e_bucket_name,
         Key: filename,
-        Expires: 60
+        Expires: 60 * 5
     };
     const wt = {
         Bucket: e_bucket_name,

@@ -48,7 +48,7 @@ public class ImagePdfConverter {
 		this._center = _center;
 	}
 
-	public Document generarPDF(ByteArrayOutputStream os) {
+	public void generarPDF(ByteArrayOutputStream os) {
 		try {
 			Document doc = new Document(PageSize.A4, this._marginLeft, this._marginRight, this._marginTop, this._marginBottom);
 			PdfWriter.getInstance(doc, os);
@@ -68,12 +68,11 @@ public class ImagePdfConverter {
             doc.add(image);
             doc.close();
             System.out.println("Archivo guardado como: " + this._filename);
-            return doc;
             
 
         } catch (DocumentException | IOException e) {
             //PUEDE QUE VAYA ALGO RELACIONADO CON LAMBDA
-        	return new Document();
+        	System.out.println("Error en funcion de convertir");
         }
 	}
 
