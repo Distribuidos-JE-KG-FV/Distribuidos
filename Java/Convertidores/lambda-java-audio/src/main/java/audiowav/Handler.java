@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,8 +16,11 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.event.S3EventNotification.S3EventNotificationRecord;
+import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
+import com.amazonaws.services.s3.model.GetObjectTaggingResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 public class Handler implements RequestHandler<S3Event, String> {
@@ -58,12 +62,14 @@ public class Handler implements RequestHandler<S3Event, String> {
                 return "";
             }
 
-           
+            GetObjectTaggingRequest getTaggingRequest = new GetObjectTaggingRequest(srcBucket, srcKey);
             AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
-            /*S3Object s3Object = s3Client.getObject(new GetObjectRequest(
-                    srcBucket, srcKey));
-            InputStream objectData = s3Object.getObjectContent();
-            //URL objectURL=s3Client.getUrl(srcBucket, srcKey);*/
+            GetObjectTaggingResult getTagsResult = s3Client.getObjectTagging(getTaggingRequest);
+            List<Tag> tags=getTagsResult.getTagSet();
+            String channel="";
+            if(!tags.isEmpty()) {
+            	channel=tags.get(0).getValue();
+            }
             File originalAudio=new File("/tmp/"+srcKey.split("/")[1]);
             try {
                 S3Object o = s3Client.getObject(srcBucket, srcKey);
@@ -91,7 +97,7 @@ public class Handler implements RequestHandler<S3Event, String> {
             }
             
             AudioWavConverter audio=new AudioWavConverter();
-            File newAudio=audio.audioConvert(originalAudio.getName(), dstKey);
+            File newAudio=audio.audioConvert(originalAudio.getName(), dstKey, Integer.parseInt(channel));
    
             // Uploading to S3 destination bucket
             System.out.println("Writing to: " + dstBucket + "/" + dstKey);

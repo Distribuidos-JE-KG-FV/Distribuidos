@@ -6,6 +6,8 @@ import ws.schild.jave.EncoderException;
 import ws.schild.jave.EncodingAttributes;
 import ws.schild.jave.MultimediaObject;
 import ws.schild.jave.VideoAttributes;
+
+
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,13 +15,13 @@ import java.util.logging.Logger;
 
 public class VideoAviConverter {
 	
-	public File videoConvert(String in, String out ) {
+	public File videoConvert(String in, String out, int channel ) {
 	    File source = new File("/tmp/"+in);
 	    File target = new File("/tmp/"+out);
 	    AudioAttributes audio = new AudioAttributes();
 	    audio.setCodec("libmp3lame");
 	    audio.setBitRate(new Integer(56000));
-	    audio.setChannels(new Integer(1));
+	    audio.setChannels(new Integer(channel));
 	    audio.setSamplingRate(new Integer(22050));
 	    VideoAttributes video = new VideoAttributes();
 	    video.setCodec(VideoAttributes.DIRECT_STREAM_COPY);
@@ -39,5 +41,7 @@ public class VideoAviConverter {
 	    }
 	    return target;
 	}
+	
+	
 
 }
